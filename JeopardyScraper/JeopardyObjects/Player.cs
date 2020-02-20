@@ -32,7 +32,7 @@ namespace JeopardyScraper.JeopardyObjects
             this.PlayerId = int.Parse(queryCollection.Get(0));
             
             // grams the name and the description from the DOM
-            this.Name = anchor.InnerHtml.Trim();            
+            this.Name = anchor.TextContent.Trim();            
             this.Desc = contestant.InnerHtml.Substring(contestant.InnerHtml.IndexOf("</a>") + 5).Trim();
 
             this.TeamName = GetTeamName(contestant);
@@ -116,7 +116,10 @@ namespace JeopardyScraper.JeopardyObjects
                 if (child.NodeName.ToLower() == "h3") {
                     // we found a team name, not sure if it is ours
                     teamName = child.TextContent;
-                    teamName = teamName.Substring(0, teamName.IndexOf("(")).Trim();
+                    if (teamName.Contains("(")) {
+                        // some of the team names have the winnings in parens after their name, so we want to strip that if they do
+                        teamName = teamName.Substring(0, teamName.IndexOf("(")).Trim();
+                    }                    
                     continue;
                 }
                 if (child == contestant) {

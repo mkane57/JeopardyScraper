@@ -22,8 +22,8 @@ namespace JeopardyScraper.JeopardyObjects
             this.Categories = new List<Category>();
             this.Clues = new List<Clue>();
 
-            if (players.Count > 3) {
-                // more then 3 playes means we are in a team game, we need to update the gamestate to have the right players in place now
+            if (players.Count > 4) {
+                // more then 4 playes means we are in a team game, we need to update the gamestate to have the right players in place now
                 var newPlayers = players.Where(p => p.TeamRoundPlayed == RoundType);
                 foreach (PlayerAmount playerAmount in gameState) {
                     var newPlayer = newPlayers.Where(np => np.TeamName == playerAmount.Player.TeamName).FirstOrDefault();
@@ -102,11 +102,12 @@ namespace JeopardyScraper.JeopardyObjects
             var playerNickName = endOfRoundScores.NextElementSibling.FirstElementChild.FirstElementChild.FirstElementChild;
             var playerScore = endOfRoundScores.NextElementSibling.FirstElementChild.FirstElementChild.NextElementSibling.FirstElementChild;
 
-            // for the 3 players, iterate through the siblings to get the scores and store them in the new GameState
-            for (int x = 0; x < 3; x++) {
+            // for up to 4 players (in super jeopardy, iterate through the siblings to get the scores and store them in the new GameState
+            for (int x = 0; x < 4; x++) {
                 // create the player's game state
+                // Note we are checking with an OR on team name, this is a fix for team jeopardy where the players switch every round
                 Player player = players.Where(p => p.NickName == playerNickName.TextContent || (p.TeamName == playerNickName.TextContent && p.TeamRoundPlayed == this.RoundType)).FirstOrDefault().GetPlayer();
-                decimal amount = decimal.Parse(playerScore.InnerHtml.Replace("$", string.Empty).Replace(",", string.Empty));
+                decimal amount = decimal.Parse(playerScore.TextContent.Replace("$", string.Empty).Replace(",", string.Empty));
                 PlayerAmount playerAmount = new PlayerAmount() {
                     Player = player,
                     Amount = amount
@@ -114,16 +115,21 @@ namespace JeopardyScraper.JeopardyObjects
                 // add to the end of the round
                 endOfRoundGameState.Add(playerAmount);
                 
-                // go to the next player's elements in the html table
-                playerNickName = playerNickName.NextElementSibling;
-                playerScore = playerScore.NextElementSibling;
-
                 // check if the score matched to see if we need to correct it and flag HasScoreCorrection = true
                 PlayerAmount finalPlayerAmount = this.GameState.Where(gs => gs.Player.NickName == playerAmount.Player.NickName || (gs.Player.TeamName == playerAmount.Player.NickName && gs.Player.TeamRoundPlayed == this.RoundType)).FirstOrDefault();
                 if (finalPlayerAmount.Amount != playerAmount.Amount) {
                     this.
                         HasScoreCorrection = true;
                     finalPlayerAmount.Amount = playerAmount.Amount;
+                }
+
+                // go to the next player's elements in the html table
+                playerNickName = playerNickName.NextElementSibling;
+                playerScore = playerScore.NextElementSibling;
+
+                if (playerNickName == null) {
+                    // this will hit in 3 player games, but we need it so we can support 4 player super jeopardy
+                    break;
                 }
             }
             return endOfRoundGameState;

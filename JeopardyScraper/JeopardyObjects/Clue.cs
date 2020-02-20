@@ -44,7 +44,7 @@ namespace JeopardyScraper.JeopardyObjects
                 bool isFinalJeopardy = true;
                 if (clueValueNode != null) {
                     isFinalJeopardy = false;
-                    string questionAmount = clueValueNode.InnerHtml.Replace("$", string.Empty);
+                    string questionAmount = clueValueNode.TextContent.Replace("$", string.Empty);
                     this.IsDailyDouble = false;
                     if (questionAmount.StartsWith("DD:")) {
                         this.IsDailyDouble = true;
@@ -201,7 +201,7 @@ namespace JeopardyScraper.JeopardyObjects
                 ParseFinalJeopardyQuestion(nodes);
             }
             else {
-                this.CorrectAnswer = nodes.GetElementsByClassName("correct_response").FirstOrDefault().InnerHtml;
+                this.CorrectAnswer = nodes.GetElementsByClassName("correct_response").FirstOrDefault().TextContent;
                 ParseNormalQuestion(nodes, wrongAnswers);
             }
             
@@ -222,11 +222,11 @@ namespace JeopardyScraper.JeopardyObjects
             var playerGotItWrongElements = nodes.GetElementsByClassName("wrong");
             foreach (var playerGotItWrongElement in playerGotItWrongElements) {
                 // grab the player's nickname
-                string playerGotItWrong = playerGotItWrongElement.InnerHtml.Trim();
+                string playerGotItWrong = RemoveEscapeCharacterFromNickName(playerGotItWrongElement.TextContent.Trim());
                 // sometimes they drop Triple Stumper in here if no one answered the clue and the alarm sounded
-                if (playerGotItWrong == "Triple Stumper") {                    
+                if (playerGotItWrong == "Triple Stumper" || playerGotItWrong == "Quadruple Stumper") {                    
                     return;
-                }
+                }                
                 
                 // get the player that got it wrong from the GameState
                 PlayerAmount playerGameState = GameState.Where(x => x.Player.NickName == playerGotItWrong).FirstOrDefault();
@@ -256,7 +256,7 @@ namespace JeopardyScraper.JeopardyObjects
             // and the score change is positive
             var playerGotItRightElement = nodes.GetElementsByClassName("right").FirstOrDefault();
             if (playerGotItRightElement != null) {
-                string playerGotItRight = playerGotItRightElement.InnerHtml.Trim();
+                string playerGotItRight = RemoveEscapeCharacterFromNickName(playerGotItRightElement.TextContent.Trim());
                 PlayerAmount playerGameState = GameState.Where(x => x.Player.NickName == playerGotItRight).FirstOrDefault();                
                 Player gotItRight = playerGameState.Player;                
 
@@ -310,9 +310,9 @@ namespace JeopardyScraper.JeopardyObjects
         /// <param name="playerOrderLoopup">Order in which the players answered the question</param>
         private void ParseFinalJeopardyPlayerAnswer(IElement playerAnswer, bool isIncorrect, Dictionary<Player, int> playerOrderLoopup) {
             // grab the relevent information from the DOM IElement
-            string playerNickName = playerAnswer.InnerHtml;
+            string playerNickName = RemoveEscapeCharacterFromNickName(playerAnswer.TextContent.Trim()); 
             string answer = playerAnswer.NextElementSibling.InnerHtml;
-            string wagerStr = playerAnswer.ParentElement.NextElementSibling.FirstElementChild.InnerHtml;
+            string wagerStr = playerAnswer.ParentElement.NextElementSibling.FirstElementChild.TextContent;
             decimal wager = decimal.Parse(wagerStr.Replace("$", string.Empty).Replace(",", ""));
 
             // get the players current game state
@@ -329,6 +329,20 @@ namespace JeopardyScraper.JeopardyObjects
             // Updates the game state for this player based on whether they got it right or not
             playerGameState.Amount += wager * (isIncorrect ? -1 : 1);
         }
+
+        /// <summary>
+        /// Helper function to remove escape character when needed for names that have a single apostrophe
+        /// </summary>
+        /// <param name="nickName">Nick Name to remove slach from</param>
+        /// <returns>Nick name without slash</returns>
+        private string RemoveEscapeCharacterFromNickName(string nickName) {
+            if (nickName.Contains("'")) {
+                // because the names are caught inside single quotes, if the name has a single quote, we have to remove the escape character because there is an extra \
+                return nickName.Replace(@"\", @"");
+            }
+            return nickName;
+        }
+
 
         #endregion Helper Functions
 

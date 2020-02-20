@@ -28,11 +28,11 @@ namespace JeopardyScraper.JeopardyObjects
             // Get the season name
             IElement anchor = season.GetElementsByTagName("a").FirstOrDefault();
             if (anchor.FirstElementChild == null) {
-                this.SeasonName = anchor.InnerHtml;
+                this.SeasonName = anchor.TextContent;
             }
             else {
                 // special seasons they put in an italic tag
-                this.SeasonName = anchor.FirstElementChild.InnerHtml;
+                this.SeasonName = anchor.FirstElementChild.TextContent;
             }
             
             // Save our URL for later use
@@ -40,7 +40,7 @@ namespace JeopardyScraper.JeopardyObjects
             this.SeasonUrl = Url.Combine(Url.GetRoot(baseUrl), seasonUrl);
 
             // Grab the date range for the season
-            string dateRange = anchor.ParentElement.NextElementSibling.InnerHtml;
+            string dateRange = anchor.ParentElement.NextElementSibling.TextContent;
             if (dateRange.Contains("and")) {
                 // this is a special case for the pilot season
                 dateRange = dateRange.Replace("and", "to").Replace("?", "-1-1");

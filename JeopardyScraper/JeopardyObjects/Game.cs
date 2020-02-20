@@ -99,10 +99,12 @@ namespace JeopardyScraper.JeopardyObjects
             List<string> nickNames = new List<string>();
             var nickNameNodes = document.All.Where(x => x.ClassName == "score_player_nickname");
             foreach (var nickNameNode in nickNameNodes) {
-                if (nickNames.Count > 2) {
+                if (nickNames.Count > 3) {
+                    // we can have up to 4 players during Super Jeopardy!
                     break;
                 }
-                string nickName = nickNameNode.InnerHtml.Trim();
+                
+                string nickName = nickNameNode.TextContent.Trim();
                 if (nickNames.Contains(nickName) == false) {
                     nickNames.Add(nickName);
                 }
@@ -131,9 +133,9 @@ namespace JeopardyScraper.JeopardyObjects
             // Grab the scores at the end of each round.  While we keep a running tally of scores throughout the round, occasionally
             // an error occurs durign the game and Alex T alters a score later.  We use this to correct the running tally of scores 
             // at the end of each round
-            var endOfJeopardyRound = document.All.Where(x => x.InnerHtml == "Scores at the end of the Jeopardy! Round:").FirstOrDefault();
-            var endOfDoubleJeopardyRound = document.All.Where(x => x.InnerHtml == "Scores at the end of the Double Jeopardy! Round:").FirstOrDefault();
-            var endOfFinalJeopardyRound = document.All.Where(x => x.InnerHtml == "Final scores:").FirstOrDefault();
+            var endOfJeopardyRound = document.All.Where(x => x.TextContent == "Scores at the end of the Jeopardy! Round:").FirstOrDefault();
+            var endOfDoubleJeopardyRound = document.All.Where(x => x.TextContent == "Scores at the end of the Double Jeopardy! Round:").FirstOrDefault();
+            var endOfFinalJeopardyRound = document.All.Where(x => x.TextContent == "Final scores:").FirstOrDefault();
 
             // process each round individually in a try catch.  We won't throw a game out simply because of an error within a single round
             // because it could be something simple and/or could still be valid overall for our data.

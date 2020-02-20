@@ -40,7 +40,7 @@ namespace JeopardyScraper
 
                 // Now process the seasons we collected from the All Seasons page
                 string outputFilePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                //List<string> failedGames = ProcessGamesInSeasons(httpClient, seasons, new List<int>() { 6232 });
+                //List<string> failedGames = ProcessGamesInSeasons(httpClient, seasons, new List<int>() { 6229, 6227 });
                 List<string> failedGames = ProcessSeasons(httpClient, seasons, outputFilePath, false);
 
                 // Print out any URLs for Games that failed to load
@@ -64,11 +64,18 @@ namespace JeopardyScraper
         private static List<string> ProcessGamesInSeasons(HttpClient httpClient, List<Season> seasons, List<int> gameIds) {
             List<string> failedGames = new List<string>();
 
-            foreach (Season season in seasons) {                
+            // for debugging when focusing on a single season
+            //string[] seasonsToProcess = new string[] { "Season 20" };
+
+            foreach (Season season in seasons) {
+
+                // for debugging when focusing on a single season
+                //if (seasonsToProcess.Contains(season.SeasonName) == false) { continue; }
+
                 Console.WriteLine("Processing a Games for Season - {0}", season.ToString());
                 failedGames.AddRange(season.ProcessGamesForSeason(httpClient, gameIds));
             }
-            return failedGames;
+            return RemoveFailedGamesThatAreKnownIncomplete(failedGames);
         }
 
         /// <summary>
@@ -119,7 +126,7 @@ namespace JeopardyScraper
                 WriteGamesToJson(fileName, seasons);
                 Console.WriteLine("Finished Writing JSON to Disk.");
             }
-            return failedGames;
+            return RemoveFailedGamesThatAreKnownIncomplete(failedGames);
         }
 
         
@@ -226,15 +233,94 @@ namespace JeopardyScraper
             return filename.Replace("  ", " ").Replace(" ", "_").ToLower();
         }
 
+        /// <summary>
+        /// Removes from the Failed Games list any games we know are incomplete on the website (and thus the error is justified)
+        /// </summary>
+        /// <param name="failedGames">List of Failed Games from our Processing of Games</param>
+        /// <returns>List of failed games that aren't known to be flawed</returns>
+        private static List<string> RemoveFailedGamesThatAreKnownIncomplete(List<string> failedGames) {
+            Queue<string> failedQueue = new Queue<string>(failedGames);
+            List<string> stillFailedGames = new List<string>();
+            while (failedQueue.Count > 0) {
+                string failedGame = failedQueue.Dequeue();
+                if (KnownIncompleteGames.Contains(failedGame) != false) {
+                    stillFailedGames.Add(failedGame);
+                }
+            }
+            return stillFailedGames;
+        }
+
+        /// <summary>
+        /// List of known games thare are not complete on the J!Archive site (they are missing at least one round)
+        /// </summary>
+        private static List<string> incompleteGames = new List<string>();
+        private static List<string> KnownIncompleteGames {
+            get {
+                if (incompleteGames.Count == 0) {
+
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6227");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6226");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6224");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6223");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=3576");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=3575");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1752");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1748");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1736");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1734");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1733");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1165");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1139");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1138");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1137");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=3552");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1151");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1153");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6361");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1133");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=320");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6359");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6358");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6362");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4983");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1134");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6317");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6085");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4760");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4759");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4758");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4757");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4767");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4766");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4765");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4764");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4763");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1135");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6054");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6065");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4960");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=5361");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6064");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=1132");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=5348");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6067");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6061");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6089");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4246");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4264");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=6056");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4284");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4256");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=5773");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4273");
+                    incompleteGames.Add("http://www.j-archive.com/showgame.php?game_id=4271");
+                }
+                return incompleteGames;
+
+            }
+        }
 
         #endregion Helper Functions
 
     }
-
-
-
-
-
-
-
 }
