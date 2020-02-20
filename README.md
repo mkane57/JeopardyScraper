@@ -6,6 +6,4 @@ to scrape the information from the J!Archive (http://www.j-archive.com) website 
 of Jeopardy ever played.  This code is open sourced and offered freely under the MIT license.  Enjoy!
 
 Authors:
-Matt Kane (mattkane@berkeley.edu)
-Elena Petrov
-Justin Stanley
+Matt Kane, Elena Petrov, Justin Stanley
