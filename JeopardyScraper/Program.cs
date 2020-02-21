@@ -37,7 +37,7 @@ namespace JeopardyScraper
                 IHtmlDocument allSeasonsDocument = GetAllSeasonsDocument(httpClient, allSeasonsUrl);                
                 List<Season> seasons = GetSeasons(allSeasonsUrl, allSeasonsDocument);
                 Console.WriteLine("Retrieved List of all {0} Seasons.", seasons.Count);
-
+                                
                 // Now process the seasons we collected from the All Seasons page
                 string outputFilePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 //List<string> failedGames = ProcessGamesInSeasons(httpClient, seasons, new List<int>() { 6229, 6227 });
@@ -243,7 +243,7 @@ namespace JeopardyScraper
             List<string> stillFailedGames = new List<string>();
             while (failedQueue.Count > 0) {
                 string failedGame = failedQueue.Dequeue();
-                if (KnownIncompleteGames.Contains(failedGame) != false) {
+                if (KnownIncompleteGames.Contains(failedGame) == false) {
                     stillFailedGames.Add(failedGame);
                 }
             }
