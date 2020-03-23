@@ -24,8 +24,9 @@ namespace JeopardyScraper.JeopardyObjects
         /// </summary>
         /// <param name="url"></param>
         /// <param name="htmlDocument"></param>
-        public Game(string url, IHtmlDocument htmlDocument) {
+        public Game(string url, string gameDesc, IHtmlDocument htmlDocument) {
             this.url = url;
+            Description = gameDesc;
             Players = new List<PlayerFull>();
             Rounds = new List<Round>();
             GameState = new List<PlayerAmount>();
@@ -232,6 +233,10 @@ namespace JeopardyScraper.JeopardyObjects
         /// The Show Number (generally in numeric order, but not always for special seasons or shows)
         /// </summary>
         public string ShowNumber { get; set; }
+        /// <summary>
+        /// The game description as it exists on the Seasons page
+        /// </summary>
+        public string Description { get; set; }
         /// <summary>
         /// Original Air Date
         /// </summary>

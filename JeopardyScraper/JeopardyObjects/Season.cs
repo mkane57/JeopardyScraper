@@ -70,6 +70,12 @@ namespace JeopardyScraper.JeopardyObjects
             foreach (var anchor in tableOfGames.GetElementsByTagName("a")) {
 
                 string gameUrl = anchor.Attributes["href"].Value;
+                string anchorText = anchor.InnerHtml;
+
+                // there are occationaly links in the description to point to other games, so we only care about links to games that have the word 'aired' or 'taped'
+                if (anchorText.Contains("aired") == false && anchorText.Contains("taped") == false) {
+                    continue;
+                }
 
                 // if they used a relative link, we want to get the full link
                 if (gameUrl.StartsWith("http") == false) {
@@ -92,7 +98,19 @@ namespace JeopardyScraper.JeopardyObjects
                     if (gamesToProcess.Contains(gameId) == false) {
                         continue;
                     }
-                }                
+                }
+
+                string gameDesc = string.Empty;
+                // we also need to go up and over to get the game description, so we will take the anchor's parent, then it's second sibling to get the 
+                // game description
+                try {
+                    gameDesc = anchor.ParentElement.NextElementSibling.NextElementSibling.TextContent.Replace('\n', ' ').Trim();
+                }
+                catch (Exception ex) {
+                    ex.ToString();
+                    Console.WriteLine("*** Minor error attempting to get Game Desc, we will ignore this.");
+                    Console.WriteLine();
+                }
 
                 // download the DOM document for the game
                 IHtmlDocument gameDocument = Program.ProcessUrl(httpClient, gameUrl);
@@ -100,7 +118,7 @@ namespace JeopardyScraper.JeopardyObjects
 
                 // process the game and store any failed game loads
                 try {                    
-                    Game game = new Game(gameUrl, gameDocument);                    
+                    Game game = new Game(gameUrl, gameDesc, gameDocument);                    
                     Games.Add(game);
                     Console.WriteLine("Successfully Processed Game - {0}", game.ToString());
 

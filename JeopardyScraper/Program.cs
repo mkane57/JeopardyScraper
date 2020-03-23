@@ -40,7 +40,7 @@ namespace JeopardyScraper
                                 
                 // Now process the seasons we collected from the All Seasons page
                 string outputFilePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                //List<string> failedGames = ProcessGamesInSeasons(httpClient, seasons, new List<int>() { 6229, 6227 });
+                //List<string> failedGames = ProcessGamesInSeasons(httpClient, seasons, new List<int>() { 5378, 5377, 5365, 5363, 5376, 5362 });
                 List<string> failedGames = ProcessSeasons(httpClient, seasons, outputFilePath, false);
 
                 // Print out any URLs for Games that failed to load
@@ -94,7 +94,7 @@ namespace JeopardyScraper
             List<string> failedGames = new List<string>();
 
             // for debugging of focusing on a single season
-            //string[] seasonsToProcess = new string[] { "Season 1", "Season 2", "Season 3" };
+            //string[] seasonsToProcess = new string[] { "Season 32"};
 
             foreach (Season season in seasons) {
 
